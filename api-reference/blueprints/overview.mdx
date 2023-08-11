@@ -1,0 +1,37 @@
+---
+title: "Blueprints — Declarative Configuration"
+sidebarTitle: "Overview"
+description: "Blueprints are a mechanism to declare your access policy in code for clearer legibility, change management, and auditability. The Blueprint standard is designed to be implemented as a set of easy-to-read configuration files that live in a repository with change management. The Blueprint endpoints are intended to be used in a CI/CD environment to verify and apply Blueprints to AccessOS."
+---
+
+Currently, two types of Blueprints are supported:
+
+<Card title="System Blueprints" icon="map" icontype="duotone" href="https://www.notion.so/System-Blueprint-Reference-1787ba8f02604b96a5f09150d470ae78?pvs=21">
+   Declare Birthright Access policies, Access Request Workflows, Automatic Access Request Approval rules, resource visibility filters, and custom roles on a per-system basis.
+</Card>
+<Card title="Access Bundle Blueprints" icon="file-zipper" icontype="duotone" href="https://www.notion.so/Access-Bundle-Blueprint-Reference-96a03ecf6e574b5aaf286cd9ec250878?pvs=21">
+  Declare sets of entitlements that may span multiple systems and which are requestable as single units.
+</Card>
+
+## Typical Blueprint Development Flow
+
+1. Peruse the `Examples` in the [System Blueprints reference](https://www.notion.so/System-Blueprint-Reference-1787ba8f02604b96a5f09150d470ae78?pvs=21) or the [Access Bundles Blueprints reference](https://www.notion.so/Access-Bundle-Blueprint-Reference-96a03ecf6e574b5aaf286cd9ec250878?pvs=21) to understand the general structure of a Blueprint.
+2. Author a draft Blueprint (in JSON or YAML format) using the relevant reference.
+    1. You may find the [JSON schema](https://gist.githubusercontent.com/jangerhofer/58246c4c847d4c7e54b9feb8d2340d40/raw/4f1e5b4c765d4652a2d44727cc94972074c37936/schema.json) which describes the shape of a valid Blueprint useful, as many IDEs (e.g. [VSCode](https://code.visualstudio.com/docs/languages/json#_json-schemas-and-settings)) will provide autocomplete functionality when editing a JSON file which is tagged with a JSON schema.
+    2. Almost all Blueprints will reference a variety of AccessOS entities like Groups, Resources, Roles, etc. [by name or ID](https://www.notion.so/Public-API-Documentation-e381aec183b74671b5940bc8bc2d4b96?pvs=21).  These identifiers can generally be found in:
+        1.  the AccessOS web app single system page (`/systems/[sys-id]`); in particular, the `Inventory` tab contains many of the relevant identifiers.
+        2. or, less conveniently, in the relevant AccessOS API endpoint.
+3. Submit your draft Blueprint to [the `/verify` API endpoint](https://www.notion.so/Public-API-Documentation-e381aec183b74671b5940bc8bc2d4b96?pvs=21) to validate your Blueprint.  This endpoint does not make any configuration changes.  Instead, it merely checks that your Blueprint is syntactically correct and that AccessOS recognizes all references in the Blueprint.
+4. Correct any validation errors which are returned in the body of the response from Step (4) alongside a `4xx` status code.  A valid Blueprint, on the other hand, will yield a `200` status code and a body containing the Blueprint which was validated.
+5. Finally, to apply the configuration changes in your Blueprint to AccessOS, submit the Blueprint to the [
+Apply a Blueprint](https://www.notion.so/Apply-a-Blueprint-a29287850d404038a45e5697d65f0d2c?pvs=21)  endpoint.  A `200` response indicates that the configuration change has been successfully applied!
+
+## Miscellanea
+
+- All Blueprint endpoints expect a `POST` body in JSON format (i.e. with a `Content-Type: application/json` header)
+- Blueprint entity references (e.g. systems, groups, roles, resources, etc.) may generally be specified by either a `name` or an `id` property.
+    - The `name` specifier is usually the 'friendly' name for a given entity.  It should match the `name` value returned for a given entity by the AccessOS API endpoint for the entity's kind
+        - (e.g. system `name` from [List Systems](https://www.notion.so/List-Systems-47fdc86952e949bfb593b3f7b59b23e3?pvs=21), role `name` from [List Roles](https://www.notion.so/List-Roles-df33f5b2e507467abdfce7dc5fe2ef7b?pvs=21), etc.) or the display name present in the AccessOS UI.
+    - The `id` specifier is AccessOS' internal identifier for a given entity.  It matches the `id` field returned by the relevant AccessOS API endpoint.
+        - The value is a prefixed UUIDv4; for instance, a system `id` might read: `sys-4a388852-6211-413b-88d8-27093528a893`
+    - In the case that multiple entities (within the Blueprint's system) match a given `name`,  the Blueprints endpoints expect the entity to be identified via its `id` to resolve the reference ambiguity.  In this scenario, the endpoints will return an error message similar to:  `Multiple [entities] found for name: [name]. Please provide an ID instead to specify a single [entity].`

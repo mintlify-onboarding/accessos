@@ -1,0 +1,47 @@
+{
+    "name": "",
+    "logo": {
+      "light": "/logo/light.svg",
+      "dark": "/logo/dark.svg"
+    "favicon": "/favicon.png",
+    "colors": {
+      "primary": "#1677FF",
+      "light": "#368AFF",
+      "dark": "#1677FF"
+    },
+    "topbarCtaButton": {
+      "name": "Get in Touch",
+      "url": "https://www.accessos.com/"
+    },
+    "anchors": [
+      {
+        "name": "About Us",
+        "icon": "circle-info",
+        "url": "https://www.accessos.com/"
+      }
+    ],
+    "api": {
+        "playground": {
+          "mode": "simple"
+        }
+    },
+    "navigation": [
+      {
+        "group": "API Endpoints",
+        "pages": [
+            {
+                "group": "Blueprints — Declarative Configuration",
+                "pages": [
+                    {
+                        "group": "Verify a Blueprint",
+                        "pages": [
+                            "api-reference/blueprints/overview",
+                            "api-reference/blueprints/verify-a-blueprint"
+                        ]
+                      }
+                ]
+              }
+        ]
+      }
+    ]
+  }

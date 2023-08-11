@@ -1,0 +1,46 @@
+---
+title: "Verify a Blueprint"
+api: "POST https://accessos.com/api/v1/blueprints/verify"
+description: "Accepts a Blueprint as input; makes no changes to configuration.  Indicates whether the input configuration may be applied to the target system."
+---
+
+Returns a `200` status code if the Blueprint grammar is correct and entity references (e.g. permissions, roles, users, etc.) are valid.  Otherwise, returns a `4xx` status and a description of any configuration errors.
+
+
+
+<RequestExample>
+
+```cs body
+{
+	"kind": "system",
+  "schemaVersion": "1.0.0",
+	"version": 3, 
+  "system": {
+		"kind": "com.snowflake",
+		"name": "Snowflake Development",
+		...Blueprint continues
+	}
+}
+```
+
+</RequestExample>
+
+<ResponseExample>
+
+```json Response
+{
+  "result": {
+    "data": {
+      "kind": "system",
+      "schemaVersion": "1.0.0",
+      "system": {
+        "kind": "com.snowflake",
+				"name": "Snowflake Development",
+				...Blueprint continues
+      }
+    }
+  }
+}
+```
+
+</ResponseExample>
