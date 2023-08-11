@@ -1,0 +1,42 @@
+---
+title: "Apply a Blueprint"
+api: "POST https://accessos.com/api/v1/blueprints/apply"
+description: "Accepts a Blueprint as input; overwrites existing configuration for a system (whether that configuration was created via a previous Blueprint or in the AccessOS web app) if the input is valid"
+---
+
+Returns a `200` status code if the input configuration was successfully applied.  Otherwise, returns a `4xx` status and a description of Blueprint errors.
+
+<RequestExample>
+
+```cs Body
+{
+	"kind": "system",
+  "schemaVersion": "1.0.0",
+  "version": 3, 
+  "system": {
+		"kind": "com.snowflake",
+		"name": "Snowflake Development",
+		...Blueprint continues
+	}
+}
+```
+
+</RequestExample>
+
+<RequestExample>
+```json Response
+{
+  "result": {
+    "data": {
+      "kind": "system",
+      "schemaVersion": "1.0.0",
+      "system": {
+        "kind": "com.snowflake",
+				"name": "Snowflake Development",
+				...Blueprint continues
+      }
+    }
+  }
+}
+```
+</RequestExample>

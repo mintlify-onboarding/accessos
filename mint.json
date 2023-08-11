@@ -1,14 +1,18 @@
 {
     "name": "",
     "logo": {
-      "light": "/logo/light.svg",
-      "dark": "/logo/dark.svg"
+      "light": "/logo/light.png",
+      "dark": "/logo/dark.png"
     },
     "favicon": "/favicon.png",
     "colors": {
       "primary": "#1677FF",
       "light": "#368AFF",
-      "dark": "#1677FF"
+      "dark": "#1677FF",
+      "anchors": {
+        "from": "#04D1CC",
+        "to": "#0269F2"
+      }
     },
     "topbarCtaButton": {
       "name": "Get in Touch",
@@ -22,9 +26,9 @@
       }
     ],
     "api": {
-        "playground": {
-          "mode": "simple"
-        }
+      "playground": {
+        "mode": "simple"
+      }
     },
     "navigation": [
       {
@@ -37,7 +41,8 @@
                         "group": "Verify a Blueprint",
                         "pages": [
                             "api-reference/blueprints/overview",
-                            "api-reference/blueprints/verify-a-blueprint"
+                            "api-reference/blueprints/verify-a-blueprint",
+                            "api-reference/blueprints/apply-a-blueprint"
                         ]
                       }
                 ]
