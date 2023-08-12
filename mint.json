@@ -42,7 +42,8 @@
                         "pages": [
                             "api-reference/blueprints/overview",
                             "api-reference/blueprints/verify-a-blueprint",
-                            "api-reference/blueprints/apply-a-blueprint"
+                            "api-reference/blueprints/apply-a-blueprint",
+                            "api-reference/blueprints/blueprints-reference"
                         ]
                       }
                 ]

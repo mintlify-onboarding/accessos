@@ -1,0 +1,234 @@
+---
+title: "System Blueprint Reference"
+---
+
+# Overview
+
+A System Blueprint configures five facets of system access:
+
+1. **Birthright Access:** Default mappings from Persona/Group to entitlements to cover the bulk of your access management needs and automate the Joiner/Mover/Leaver flow. 
+2. **Access Request Workflows:** A flexible IFTTT-style way to describe access requests conditioned on the request parameters, with the desired approval workflows as a result to provide more certain workflows around sensitive resources. 
+3. **Automatic Access Request Approvals:** Automatically approve access requests for certain personas for a maximum duration of time. Consider using this for providing prod-access to on-call engineers, or financial access to auditors and supporters. Eliminating long-standing access while reducing friction. 
+4. **Request Filters:** Customize the items that employees at your enterprise can request based on their attributes, reducing the risk of wrong requests and providing a more seamless UI for employees 
+5. **Custom Roles:** Define your permission sets side-by-side with your access management policy, providing a single source of truth for what folks have access to.
+
+## Examples
+
+_n.b. The below are presented in YAML format for concision, however the Blueprints endpoints expect the Blueprint contained in the request body to be in JSON format._
+
+
+### Set a default Access Request Workflow approver for Snowflake
+
+```YAML
+# yaml-language-server: $schema=https://gist.githubusercontent.com/jangerhofer/58246c4c847d4c7e54b9feb8d2340d40/raw/4f1e5b4c765d4652a2d44727cc94972074c37936/schema.json
+---
+kind: system
+schemaVersion: 1.0.0
+version: 1
+system:
+  kind: com.snowflake
+  name: Snowflake Development
+  accessRequestWorkflows:
+    - workflow:
+        approvers:
+          - email: employee@domain.com
+            kind: employee
+        condition:
+          default: true
+```
+
+### Set an Access Request Workflow approver for specific Snowflake tables
+```yaml
+# yaml-language-server: $schema=https://gist.githubusercontent.com/jangerhofer/58246c4c847d4c7e54b9feb8d2340d40/raw/4f1e5b4c765d4652a2d44727cc94972074c37936/schema.json
+---
+kind: system
+schemaVersion: 1.0.0
+version: 1
+system:
+  kind: com.snowflake
+  name: Snowflake Development
+  accessRequestWorkflows:
+  - workflow:
+      approvers:
+      - email: jd@accessos.com
+        kind: employee
+      - kind: org_group
+        name: Group_Access_Requests
+        notificationPreferences:
+          type: direct_message
+      - kind: org_group
+        name: Group_Access_Requests_2
+        notificationPreferences:
+          type: channel
+          channel:
+            name: group_channel_no_hashtag
+      condition:
+        resources:
+        - name: ACCESSOS_DEMO.DEMO.CATALOG_SALES
+          kind: com.snowflake#table
+        - name: ACCESSOS_DEMO.DEMO.CUSTOMER
+          kind: com.snowflake#table
+```
+
+### Limit which AKS roles against which the members of an Org Group may submit an Access Request
+
+```yaml
+# yaml-language-server: $schema=https://gist.githubusercontent.com/jangerhofer/58246c4c847d4c7e54b9feb8d2340d40/raw/4f1e5b4c765d4652a2d44727cc94972074c37936/schema.json
+---
+kind: system
+schemaVersion: 1.0.0
+version: 1
+system:
+  kind: com.microsoft.azure.aks
+  name: Production
+  accessRequestFilters:
+    # Allow members of the Platform Engineering group & employees who match the `On-Call Engineering Managers` Persona to request access to the `cloud-node-manager` role
+    - allowedOrgGroups:
+        - name: Platform Engineering
+      allowedPersonas:
+        - name: On-Call EMs
+      role: 
+        name: cloud-node-manager
+    # Prevent all users from submitting an Access Request for the `cluster-admin` role
+    - notRequestable: true
+      role:
+        name: cluster-admin
+```
+
+### Create a custom role in Snowflake
+
+```yaml
+# yaml-language-server: $schema=https://gist.githubusercontent.com/jangerhofer/58246c4c847d4c7e54b9feb8d2340d40/raw/4f1e5b4c765d4652a2d44727cc94972074c37936/schema.json
+---
+kind: system
+schemaVersion: 1.0.0
+version: 1
+system:
+  kind: com.snowflake
+  name: Snowflake Development
+  customRoles:
+    - name: Developer
+      permissions:
+        - action:
+            name: SELECT
+          resource:
+            name: '"ACCESSOS_DEMO"."DEMO"."CUSTOMER"'
+            kind: com.snowflake#table
+        - action:
+            name: INSERT
+          resource:
+            name: '"ACCESSOS_DEMO"."DEMO"."CUSTOMER"'
+            kind: com.snowflake#table
+```
+
+### Declare birthright roles for members of an Okta group 
+
+```yaml
+# yaml-language-server: $schema=https://gist.githubusercontent.com/jangerhofer/58246c4c847d4c7e54b9feb8d2340d40/raw/4f1e5b4c765d4652a2d44727cc94972074c37936/schema.json
+---
+kind: system
+schemaVersion: 1.0.0
+version: 1
+system:
+  kind: com.snowflake
+  name: Snowflake Development
+  entitlements:
+    - orgGroup:
+        name: Admins
+      roles:
+        - name: Developer
+        - name: Admin
+    - persona:
+        name: Team-X
+      roles:
+        - name: Developer
+        - name: Admin
+```
+
+### Everything but the kitchen sink…
+
+```yaml
+# yaml-language-server: $schema=https://gist.githubusercontent.com/jangerhofer/58246c4c847d4c7e54b9feb8d2340d40/raw/4f1e5b4c765d4652a2d44727cc94972074c37936/schema.json
+---
+kind: system
+schemaVersion: 1.0.0
+version: 1
+system:
+  kind: com.snowflake
+  name: Snowflake Development
+  accessRequestWorkflows:
+    # Send all access requests which don't match another workflow (i.e. by default) to the user designated as the the Snowflake Development owner
+    - workflow:
+        approvers:
+          - kind: system_owner
+        condition:
+          default: true
+    - workflow:
+        approvers:
+          # Send matching access requests to a specific employee
+          - kind: employee
+            email: call-center-admin@biz.com
+        condition:
+          resources:
+            - name: '"ACCESSOS_DEMO"."DEMO"."CALL_CENTER"'
+              kind: com.snowflake#table
+    - workflow:
+        approvers:
+          # Send matching access requests to the requestor's manager
+          - kind: manager
+        condition:
+          resources:
+            - name: '"ACCESSOS_DEMO"."DEMO"."CUSTOMER"'
+              kind: com.snowflake#table
+    - workflow:
+        approvers:
+          # Send matching access requests to a specific Okta group
+          - kind: org_group
+            orgGroup:
+              name: Engineering Managers
+        condition:
+          resources:
+            - name: '"ACCESSOS_DEMO"'
+              kind: com.snowflake#database
+  entitlements:
+    # Assign birthright roles
+    - orgGroup:
+        name: Admins
+      roles:
+        - name: Developer
+        - name: Admin
+        # Reference a custom role (see below)
+        - name: On-Call
+    # Assign birthright groups
+    - orgGroup:
+        name: Engineering
+      systemGroups:
+        - name: Eng
+        - name: All Employees
+  customRoles:
+    - name: On-Call
+      permissions:
+        - action:
+            name: SELECT
+          resource:
+            name: '"ACCESSOS_DEMO"."DEMO"."CUSTOMER"'
+            kind: com.snowflake#table
+        - action:
+            name: INSERT
+          resource:
+            name: '"ACCESSOS_DEMO"."DEMO"."CUSTOMER"'
+            kind: com.snowflake#table
+        - action:
+            name: UPDATE
+          resource:
+            name: '"ACCESSOS_DEMO"."DEMO"."CUSTOMER"'
+            kind: com.snowflake#table
+        - action:
+            name: DELETE
+          resource:
+            name: '"ACCESSOS_DEMO"."DEMO"."CUSTOMER"'
+            kind: com.snowflake#table
+```
+
+
+
