@@ -232,3 +232,16 @@ system:
 
 
 
+## Fields
+
+In addition to the Blueprints Common Fields, a System Blueprint includes:
+
+<ParamField path="kind" type="string" Required>
+  system
+</ParamField>
+
+<ParamField path="version" type="integer" Required>
+  Monotonically increasing counter tracking the version of the configuration applied to the target of the Blueprint (i.e. the version of system configuration).  Designed to avoid inadvertent overwrites when multiple writers apply differing Blueprints to the same system.
+</ParamField>
+
+### Specific Blueprint Types

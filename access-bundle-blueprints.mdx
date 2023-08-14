@@ -1,0 +1,177 @@
+---
+title: "Access Bundle Blueprint Reference"
+---
+
+## Overview
+
+Access Bundles are sets of entitlements that may be requested, approved (or denied!), and provisioned as a singular unit of access via an Access Request.  A Bundle’s entitlements may span multiple systems to model common access patterns (e.g. time-bound access to CSP resources alongside kubernetes during debug, or particular onboarding and training resources for a given team).
+
+`Access Bundles` are grouped by similar content or purpose into **`Access Collections`**.  A default Access Request Workflow can be set on a Collection.  That Workflow is applied whenever a Bundle in the Collection is requested.  This default may be overridden by assigning a Workflow to a Bundle directly.
+
+## Example Access Bundle Blueprint
+
+_n.b. The below are presented in YAML format for concision, however the Blueprints endpoints expect the Blueprint contained in the request body to be in JSON format._
+
+```yaml 
+# yaml-language-server: $schema=https://gist.githubusercontent.com/jangerhofer/58246c4c847d4c7e54b9feb8d2340d40/raw/4f1e5b4c765d4652a2d44727cc94972074c37936/schema.json
+---
+schemaVersion: 1.0.0
+kind: accessBundleCollection
+collection:
+	name: 'Production Access'
+  description: Production bundles
+  iconURL: https://previews.123rf.com/images/martialred/martialred1706/martialred170600007/80471629-bundle-of-mobile-software-apps-applications-in-the-app-store-line-art-vector-icon-for-websites.jpg
+
+  bundles:
+  - name: ProductionDebug
+    systems:
+    - entitlements:
+      name: us-east-1a-prod-cluster
+    - entitlements:
+        roles:
+        - name: WAREHOUSE_STAFF
+      name: Snowflake
+  - name: ProductionAdmin
+    systems:
+    - entitlements:
+        systemGroups:
+        - name: Engineering
+        roles:
+        - name: Admin
+          resource:
+            kind: com.github#organization
+            name: AccessOS-Development
+      name: GitHub
+    - entitlements:
+        roles:
+        - name: ADMIN_SUPER
+      name: Snowflake
+```
+
+
+## Fields
+
+In addition to the Blueprints Common Fields, a System Blueprint includes:
+
+<ParamField path="kind" type="string" Required>
+  `"accessBundleCollection"`
+</ParamField>
+
+<ResponseField name="collection" type="object" Required>
+  A logical grouping of related Access Bundles. 
+  <Expandable title="properties">
+    <ResponseField name="name" type="string" Required>
+      Unique identifier of the collection.
+    </ResponseField>
+
+    <ResponseField name="description" type="string" Optional>
+      Additional context about the contents or purpose of the collection.
+    </ResponseField>
+
+<ResponseField name="bundles" type="Object[]" Required>
+  Groups of entitlements which may be requested via an Access Request.
+  <Expandable title="properties">
+    <ResponseField name="name" type="string" Required>
+      Unique (within an Access Bundle Collection) identifier of the Access Bundle.
+    </ResponseField>
+
+    <ResponseField name="description" type="string" Optional>
+      Additional context about the contents or purpose of the Bundle.
+    </ResponseField>
+
+<ResponseField name="systems" type="Object[]" Required>
+  List of systems in which the Bundle provisions access.  
+  <Expandable title="properties">
+    <ResponseField name="System identifier" type="string" One of>
+      <Expandable title="properties">
+    <ResponseField name="id" type="string">
+    The AccessOS id; you can retrieve this ID from the URL of the system details page in the AccessOS web app, e.g. https://accessos.my.co/systems/sys-7afb113f-2243-419c-a76b-68984084bde2
+    </ResponseField>
+
+    <ResponseField name="name" type="string">
+      Found in the header of the same page of the AccessOS web app beside the system logo 
+    </ResponseField>
+  </Expandable>
+    </ResponseField>
+
+    <ResponseField name="entitlements" type="string" Required>
+      Description of the access which should be provisioned when a Bundle is granted to an employee.
+    </ResponseField>
+
+    <ResponseField name="resource" type="Object" Required>
+    The specific resource upon which permission holders are allowed to operate (e.g. prod-static-assets bucket).
+  <Expandable title="properties">
+
+<ResponseField name="Resource Identifier" Required One Of>
+  <Expandable title="properties">
+    <ResponseField name="id" type="string">
+      AccessOS id of target Resource
+    </ResponseField>
+
+<ResponseField name="Name descriptor" type="Object">
+  <Expandable title="properties">
+    <ResponseField name="name" type="string" Required>
+      AccessOS name of target Resource
+    </ResponseField>
+
+    <ResponseField name="kind" type="boolean" Required>
+      AccessOS resource kind descriptor.  e.g. com.github#repository
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+
+  </Expandable>
+</ResponseField>
+
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="roles" type="Object">
+  <Expandable title="properties">
+
+<ResponseField name="Role Identifier" Required One of>
+  <Expandable title="properties">
+    <ResponseField name="id" type="string">
+      AccessOS id of Role
+    </ResponseField>
+
+    <ResponseField name="name" type="string">
+      AccessOS name of Role 
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+
+  </Expandable>
+</ResponseField>
+
+
+<ResponseField name="systemGroups" type="Object">
+  <Expandable title="properties">
+
+<ResponseField name="Group Identity" Required One of>
+  <Expandable title="properties">
+    <ResponseField name="id" type="string">
+      AccessOS id of Group
+    </ResponseField>
+
+    <ResponseField name="name" type="string">
+      AccessOS name of Group 
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+
+  </Expandable>
+</ResponseField>
+
+  </Expandable>
+</ResponseField>
+
+
+  </Expandable>
+</ResponseField>
+
+  </Expandable>
+</ResponseField>
