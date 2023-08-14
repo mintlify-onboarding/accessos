@@ -245,3 +245,50 @@ In addition to the Blueprints Common Fields, a System Blueprint includes:
 </ParamField>
 
 ### Specific Blueprint Types
+
+<ResponseField name="system" type="Object" Required>
+  <Expandable title="properties">
+
+<ResponseField name="System Identifier" Required>
+One of
+  <Expandable title="properties">
+    <ResponseField name="id" type="string">
+      The AccessOS id; you can retrieve this ID from the URL of the system details page in the AccessOS web app, e.g. https://accessos.my.co/systems/sys-7afb113f-2243-419c-a76b-68984084bde2
+    </ResponseField>
+
+    <ResponseField name="name" type="string">
+      Found in the header of the same page of the AccessOS web app beside the system logo 
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ParamField path="kind" type="enum" Required>
+  Used to disambiguate any target system identifier conflicts.  n.b. The kind for any system in AccessOS is available by hovering over the system name in either the systems table (/systems) or the single system page `(/systems/[sys-id])`.
+</ParamField>
+
+<ResponseField name="accessRequestFilters" type="Object[]" Optional>
+Constrain the set of Roles and Resources to which your users may request access by allowing particular access on a per- Group or -Persona basis.  If a role/resource is omitted, then it is visible to all users by default.
+  <Expandable title="properties">
+    <ResponseField name="allowedOrgGroups" type="Object[]" Optional>
+
+<ResponseField name="Group Identifier" Required>
+One of
+  <Expandable title="properties">
+    <ResponseField name="id" type="string">
+    </ResponseField>
+
+    <ResponseField name="name" type="string">
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+    </ResponseField>
+
+  </Expandable>
+</ResponseField>
+
+
+  </Expandable>
+
+
+</ResponseField>
