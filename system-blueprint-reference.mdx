@@ -246,3 +246,418 @@ In addition to the Blueprints Common Fields, a System Blueprint includes:
 
 ### Specific Blueprint Types
 
+<ResponseField name="system" type="object" Required>
+  <Expandable title="properties">
+    <ResponseField name="System Identifier" type="Required">
+    One of
+      <Expandable title="properties">
+        <ResponseField name="id" type="string">
+          The AccessOS id; you can retrieve this ID from the URL of the system details page in the AccessOS web app, e.g. https://accessos.my.co/systems/sys-7afb113f-2243-419c-a76b-68984084bde2
+        </ResponseField>
+        <ResponseField name="name" type="string">
+          Found in the header of the same page of the AccessOS web app beside the system logo 
+        </ResponseField>        
+      </Expandable>
+    </ResponseField>
+    <ResponseField name="kind" type="enum" Required>
+      Used to disambiguate any target system identifier conflicts.  n.b. The kind for any system in AccessOS is available by hovering over the system name in either the systems table `(/systems)` or the single system page `(/systems/[sys-id])`.
+    </ResponseField>
+    <ResponseField name="accessRequestFilters" type="object[]" Optional>
+      Constrain the set of Roles and Resources to which your users may request access by allowing particular access on a per- Group or -Persona basis.  If a role/resource is omitted, then it is visible to all users by default.
+      <Expandable title="properties">
+        <ResponseField name="allowedOrgGroups" type="object[]" Optional>
+        Group Identifier Required — One of:
+          <Expandable title="properties">
+            <ResponseField name="id" type="string">
+              The full name of the user
+            </ResponseField>
+            <ResponseField name="name" type="string">
+              The full name of the user
+            </ResponseField>
+          </Expandable>        
+        </ResponseField>
+      </Expandable> 
+        <ResponseField name="allowedPersonas" type="object[]" Optional>
+        Persona Identifier Required — One of:
+          <Expandable title="properties">
+            <ResponseField name="id" type="string">
+              The full name of the user
+            </ResponseField>
+            <ResponseField name="name" type="string">
+              The full name of the user
+            </ResponseField>
+          </Expandable>        
+        </ResponseField>  
+        <ResponseField name="Filter target" Required>
+        One of 
+          <Expandable title="properties">
+            <ResponseField name="role" type="object">
+              Allow users who match one of the associated allowedOrgGroups or allowedPersonas to make requests against this role.
+              Role identifier Required — One of
+              <Expandable title="properties">
+                <ResponseField name="id" type="string">
+                  AccessOS id of Role
+                </ResponseField>
+                <ResponseField name="name" type="string">
+                  AccessOS name of Role
+                </ResponseField>                
+              </Expandable>        
+            </ResponseField>
+            <ResponseField name="resource" type="object" Optional>
+            Resource Identifier Required — One of: 
+              <Expandable title="properties">
+                <ResponseField name="id" type="string">
+                  AccessOS id of target Resource
+                </ResponseField>
+                <ResponseField name="name" type="string">
+                  AccessOS name of target Resource
+                </ResponseField>                
+              </Expandable>
+            </ResponseField>    
+          </Expandable>
+        </ResponseField> 
+        <ResponseField name="notRequestable" type="boolean" Optional>
+        </ResponseField>         
+    <ResponseField name="accessRequestWorkflows" type="object[]" Optional>
+      Assign responsibility for adjudicating Access Requests to specific employees, entire Org Groups/Personas, and/or to the requestor's manager on a per Role-, per Resource-, or default basis.
+      <Expandable title="properties">
+        <ResponseField name="approvers" type="Enum[]" Required>
+          min. length = 1. The employees specified by the entries in this array will receive Access Request submissions and will have the ability to approve or reject each Access Request.
+          <Expandable title="properties">
+            <ResponseField name="Employee" type="object">
+              Designate a particular employee to adjudicate Access Requests.
+              <Expandable title="properties">
+                <ResponseField name="kind" type="string" Required>
+                  employee
+                </ResponseField>
+                <ResponseField name="Employee Identity" Required>
+                  One of
+                  <Expandable title="properties">
+                    <ResponseField name="email" type="string">
+                      Email address of the employee
+                    </ResponseField>
+                    <ResponseField name="id" type="string">
+                      AccessOS id of target Employee
+                    </ResponseField>                    
+                  </Expandable>                  
+                </ResponseField>                
+              </Expandable>              
+            </ResponseField>
+            <ResponseField name="Manager" type="object">
+              Route new Access Requests to the requestor's manager.
+              <Expandable title="properties">
+                <ResponseField name="kind" type="string" Required>
+                  manager
+                </ResponseField>
+              </Expandable>
+            </ResponseField>  
+            <ResponseField name="Org Group" type="object">
+              Route new Access Requests to all of the members of an Org Group; any member of the Org Group can approve or reject the Access Request on behalf of the Org Group.
+              <Expandable title="properties">
+                <ResponseField name="kind" type="string" Required>
+                  org_group
+                </ResponseField>
+                <ResponseField name="orgGroup" Required>
+                One of
+                  <Expandable title="properties">
+                    <ResponseField name="id" type="string">
+                      AccessOS id of target Org Group
+                    </ResponseField>
+                    <ResponseField name="name" type="string">
+                      AccessOS name of target Org Group
+                    </ResponseField>                    
+                  </Expandable>
+                </ResponseField>                
+              </Expandable>
+            </ResponseField> 
+            <ResponseField name="Persona" type="object">
+              Route new Access Requests to all employees who match a Persona; any matching employee can approve or reject the Access Request on behalf of the entire Persona.
+              <Expandable title="properties">
+                <ResponseField name="kind" type="string" Required>
+                  persona
+                </ResponseField>
+                <ResponseField name="" type="string" Required>
+                  One of:
+                  <Expandable title="properties">
+                    <ResponseField name="id" type="string">
+                      AccessOS id of target Persona
+                    </ResponseField>
+                    <ResponseField name="name" type="string">
+                      AccessOS name of target Persona
+                    </ResponseField>                    
+                  </Expandable>                  
+                </ResponseField>                
+              </Expandable>
+            </ResponseField>    
+            <ResponseField name="System owner" type="object">
+              Route new Access Requests to the employee designated as an owner of the system against which the Access Request was placed.
+              <Expandable title="properties">
+                <ResponseField name="kind" type="string" Required>
+                  system_owner
+                </ResponseField>
+              </Expandable>
+            </ResponseField>    
+            <ResponseField name="approverRequirement" type="enum">
+              Optional —Enum: `["all", "any"]` —Default: `any` — Specifies whether the access specified by an Access Request is granted to the requestor after the first Approver approves the Access Request or *if, and only if*, all Approvers approve the Request.
+            </ResponseField>  
+          <ResponseField name="maxRequestableTimeMinutes" type="integer" Optional>
+            Specifies the maximum requestable duration (in minutes) for access requests that match the given condition. 
+          </ResponseField>      
+          <ResponseField name="condition" type="object" Required>
+            Specify which Access Requests should be routed to the specified Approvers based on the type of access which is requested.  
+            <Expandable title="properties">
+              <ResponseField name="default" type="boolean" Optional>
+                Default: false — Set this workflow as the catch-all for Access Requests which do not match the condition of another workflow.
+              </ResponseField>
+              <ResponseField name="resources" type="object[]" Optional>
+                Match any Access Request which requests access to one of the given set of Resources.
+                <Expandable title="properties">
+                  <ResponseField name="Resource Identifier" Required>
+                    One of:
+                    <Expandable title="properties">
+                      <ResponseField name="id" type="string">
+                        AccessOS id of target Resource
+                      </ResponseField>
+                      <ResponseField name="name" type="string">
+                        AccessOS name of target Resource
+                      </ResponseField>                      
+                    </Expandable>                    
+                  </ResponseField>
+                  <ResponseField name="kind" type="string" Required>
+                    AccessOS resource kind descriptor.  e.g. com.github#repository
+                  </ResponseField>                  
+                </Expandable>                
+              </ResponseField>              
+              <ResponseField name="roles" type="object[]" Optional>
+                Match any Access Request which requests one of the given set of Roles.
+                <Expandable title="properties">
+                  <ResponseField name="Role identifier" Required>
+                    One of: 
+                    <Expandable title="properties">
+                      <ResponseField name="id" type="string">
+                        AccessOS id of Role
+                      </ResponseField>
+                      <ResponseField name="name" type="string">
+                        AccessOS name of Role
+                      </ResponseField>                      
+                    </Expandable>                    
+                  </ResponseField>
+                  <ResponseField name="resourceKindScope" type="string" Optional>
+                    Only match on Roles which are requested over a particular Resource kind.
+                  </ResponseField>                  
+                </Expandable>
+              </ResponseField>              
+            </Expandable>            
+          </ResponseField>                                                                  
+          </Expandable>          
+        </ResponseField>
+      </Expandable>      
+    </ResponseField>
+    <ResponseField name="accessRequestAutomaticApprovalRules" type="object[]">
+      Configure immediate, automatic approval when specific requestors submit Access Requests for the specified particular access.
+      <Expandable title="properties">
+        <ResponseField name="entitlement" type="object" Required>
+          <Expandable title="properties">
+            <ResponseField name="Entitlement type" Required>
+              One of:
+              <ResponseField name="role" type="object">
+                <Expandable title="properties">
+                  <ResponseField name="Role Identifier" Required>
+                    One of:
+                    <Expandable title="properties">
+                      <ResponseField name="id" type="string">
+                        AccessOS id of Role
+                      </ResponseField>
+                      <ResponseField name="name" type="string">
+                        AccessOS name of Role
+                      </ResponseField>                      
+                    </Expandable>                   
+                  </ResponseField>
+                <ResponseField name="resource" type="object" Optional>
+                  <Expandable title="properties">
+                    <ResponseField name="Resource identifier" Required>
+                      One of
+                      <Expandable title="properties">
+                        <ResponseField name="id" type="string">
+                          AccessOS id of Role
+                        </ResponseField>
+                        <ResponseField name="name" type="string">
+                          AccessOS name of Role
+                        </ResponseField>                      
+                      </Expandable>                                
+                    </ResponseField>
+                  <ResponseField name="kind" type="string" Required>
+                    AccessOS resource kind descriptor.  e.g. com.github#repository
+                  </ResponseField>                    
+                  </Expandable>
+                </ResponseField>                                
+                </Expandable>
+              </ResponseField> 
+            <ResponseField name="systemGroup" type="oject">
+              <Expandable title="properties">
+                <ResponseField name="Group Identity" Required>
+                  One of:
+                      <Expandable title="properties">
+                        <ResponseField name="id" type="string">
+                          AccessOS id of Role
+                        </ResponseField>
+                        <ResponseField name="name" type="string">
+                          AccessOS name of Role
+                        </ResponseField>                      
+                      </Expandable>   
+                </ResponseField>
+              </Expandable>
+            </ResponseField>                           
+            </ResponseField>
+          </Expandable>
+        </ResponseField>
+      <ResponseField name="maximumDurationRequestedHours" type="integer" Required>
+        Sets an upper bound on the duration of access that will be granted automatically.  If an Access Request is submitted with a duration less than or equal to the maximumDurationRequestedHours, then Access Request is approved for the requested duration.  If, conversely, the Access Request is submitted with a duration greater than maximumDurationRequestedHours, then no automate approval is granted and the Access Request follows the appropriate Access Request Workflow.
+      </ResponseField>
+      <ResponseField name="requestor" type="object" Required>
+        <Expandable title="properties">
+          <ResponseField name="Requestor Identity" Required >
+            One of:
+            <Expandable title="properties">
+              <ResponseField name="orgGroup" type="object">
+                <Expandable title="properties">
+                  <ResponseField name="Org Group Identity" Required>
+                    One of: 
+                      <Expandable title="properties">
+                        <ResponseField name="id" type="string">
+                          AccessOS id of Role
+                        </ResponseField>
+                        <ResponseField name="name" type="string">
+                          AccessOS name of Role
+                        </ResponseField>                      
+                      </Expandable>                       
+                  </ResponseField>
+                </Expandable>
+              </ResponseField>
+              <ResponseField name="persona" type="object">
+                <Expandable title="properties">
+                  <ResponseField name="Persona Identity" Required>
+                    One of: 
+                      <Expandable title="properties">
+                        <ResponseField name="id" type="string">
+                          AccessOS id of Persona
+                        </ResponseField>
+                        <ResponseField name="name" type="string">
+                          AccessOS name of Persona
+                        </ResponseField>                      
+                      </Expandable>                       
+                  </ResponseField>
+                </Expandable>
+              </ResponseField>              
+            </Expandable>            
+          </ResponseField>
+        </Expandable>
+      </ResponseField>              
+      </Expandable>
+    </ResponseField> 
+    <ResponseField name="customRoles" type="object[]" Optional>
+      Declare new bundles of permissions to be created in the end system.  Can be reference throughout the Blueprint.
+      <Expandable title="properties">
+        <ResponseField name="name" type="string" Required> 
+          A unique name for the role in the end system.
+        </ResponseField>
+        <ResponseField name="permissions" type="object[]" Required> 
+          <Expandable title="properties">
+            <ResponseField name="action" type="object" Required>
+              The type of operation permission holders are allowed to perform in the end system
+              <Expandable title="properties">
+                <ResponseField name="name" type="string" Required>
+                </ResponseField>
+              </Expandable>              
+            </ResponseField>
+            <ResponseField name="resource" type="object" Optional>
+              The specific resource upon which permission holders are allowed to operate (e.g. prod-static-assets bucket).
+              <Expandable title="properties">
+                <ResponseField name="Resource Identifier" Required>
+                  One of:
+                      <Expandable title="properties">
+                        <ResponseField name="id" type="string">
+                          AccessOS id of Resource
+                        </ResponseField>
+                        <ResponseField name="name" type="string">
+                          AccessOS name of Resource
+                        </ResponseField>                      
+                      </Expandable>                        
+                </ResponseField>
+                <ResponseField name="kind" type="string" Required>
+                  AccessOS resource kind descriptor.  e.g. com.github#repository
+                </ResponseField>                
+              </Expandable>
+            </ResponseField>            
+          </Expandable>
+        </ResponseField>        
+      </Expandable>
+    </ResponseField>
+    <ResponseField name="entitlements" type="object[]" Optional>
+      Declare access by specifying which Roles and Groups should be granted to all members of target Org Groups and Personas.
+      <Expandable title="properties">
+        <ResponseField name="target" Required>
+          One of:
+          <Expandable title="properties">
+            <ResponseField name="orgGroup" type="object" Required >
+              <Expandable title="properties">
+                <ResponseField name="Org Group Identity" type="string" Required>
+                  Members of this target group will receive access specified by the roles and systemGroups keys
+                  One of: 
+                      <Expandable title="properties">
+                        <ResponseField name="id" type="string">
+                          AccessOS id of Resource
+                        </ResponseField>
+                        <ResponseField name="name" type="string">
+                          AccessOS name of Resource
+                        </ResponseField>                      
+                      </Expandable>                   
+                </ResponseField>
+              </Expandable>              
+            </ResponseField>
+            <ResponseField name="persona" type="object" Required>
+              <Expandable title="properties">
+                <ResponseField name="Persona Identity" Required>
+                  Employees which match this Persona will receive access specified by the roles and systemGroups keys
+                  One of:
+                  <Expandable title="properties">
+                    <ResponseField name="id" type="string">
+                      AccessOS id of target Persona
+                    </ResponseField>
+                    <ResponseField name="name" type="string">
+                      AccessOS name of target Persona
+                    </ResponseField>                    
+                  </Expandable>                  
+                </ResponseField>
+              </Expandable>
+            </ResponseField>       
+            </Expandable>          
+          </ResponseField>
+      </Expandable>
+    </ResponseField>               
+    </ResponseField>    
+  </Expandable>
+</ResponseField>
+
+
+
+
+
+
+
+
+
+
+
+
+<ResponseField name="user" type="User Object">
+  <Expandable title="properties">
+    <ResponseField name="full_name" type="string">
+      The full name of the user
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="username" type="string" Required>
+  The username of the user
+</ResponseField>
